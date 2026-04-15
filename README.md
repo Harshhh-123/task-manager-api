@@ -57,3 +57,31 @@ src/
   modules/
     users/      — user model, controller, routes
     tasks/      — task model, controller, routes
+
+    ## Assignment 3 Features
+
+### Task Categories & Tags
+- Tasks support categories: Work, Personal, Urgent, Other
+- Tasks support multiple free-form tags
+- Filter tasks: GET /api/tasks?category=Work&tags=Bug Fix
+
+### Webhook on Completion
+- When task marked "completed", POST request sent to WEBHOOK_URL
+- Payload includes: taskId, title, completionDate, userId
+- Retry logic: 3 retries with exponential backoff (1s, 2s, 3s delays)
+
+### Task Reminders (Simulated)
+- When task created with due_date, reminder scheduled 1 hour before
+- Reminder logged to console
+- Cancels automatically if task completed early or due_date updated
+
+### Environment Variable Added
+Add this to your .env file:
+WEBHOOK_URL=https://webhook.site/your-unique-url
+
+## Design Decisions
+- PostgreSQL for users — relational, structured schema
+- MongoDB for tasks — flexible schema, easy to add tags/categories
+- In-memory setTimeout for reminders — lightweight, no Redis needed
+- Exponential backoff for webhook retries — resilient external calls
+- JWT stateless auth — no session storage needed
