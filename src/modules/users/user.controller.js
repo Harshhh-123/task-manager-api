@@ -6,6 +6,7 @@ const User = require('./user.model');
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
+  name: Joi.string().required(),
 });
 
 const loginSchema = Joi.object({
@@ -18,15 +19,16 @@ exports.register = async (req, res, next) => {
     const { error } = registerSchema.validate(req.body);
     if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
     const existing = await User.findOne({ where: { email } });
-    if (existing) return res.status(400).json({ success: false, message: 'Email already in use' });
+    if (existing) return res.status(400).json({ success: false, message: 'Email already registered' });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hashed });
+    const user = await User.create({ email, password: hashed, name });
 
-    res.status(201).json({ success: true, message: 'User registered', userId: user.id });
+    res.status(201).json({ success: true, message: 'User registered successfully' });
   } catch (err) {
+    console.error('REGISTER ERROR:', err);
     next(err);
   }
 };
@@ -47,13 +49,14 @@ exports.login = async (req, res, next) => {
 
     res.json({ success: true, token });
   } catch (err) {
+    console.error('LOGIN ERROR:', err);
     next(err);
   }
 };
 
 exports.getProfile = async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.user.id, { attributes: ['id', 'email'] });
+    const user = await User.findByPk(req.user.id, { attributes: ['id', 'email', 'name'] });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, user });
   } catch (err) {

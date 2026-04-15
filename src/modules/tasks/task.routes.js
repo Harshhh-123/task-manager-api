@@ -1,15 +1,21 @@
-const router = require('express').Router();
+const express = require('express');
+const router = express.Router();
 const auth = require('../../middleware/auth');
 const {
-  createTask, getTasks, getTaskById, updateTask, deleteTask
+  createTask,
+  getTasks,
+  getTaskById,
+  updateTask,
+  deleteTask,
 } = require('./task.controller');
 
+// All routes protected
 router.use(auth);
 
 router.post('/', createTask);
-router.get('/', getTasks);
+router.get('/', getTasks);        // supports ?category=Work&tags=urgent,bug
 router.get('/:id', getTaskById);
-router.patch('/:id', updateTask);
+router.put('/:id', updateTask);
 router.delete('/:id', deleteTask);
 
 module.exports = router;
